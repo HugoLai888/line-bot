@@ -35,11 +35,13 @@ module.exports = async (req, res) => {
         try {
           const response = await axios.get(csvURL);
           const lines = response.data.split('\n');
-          const keyword = match[1].trim().replace(/\s/g, '');  // 移除空白
+          const rawKeyword = match[1].trim().replace(/\s/g, '').toLowerCase();
+const keywordParts = rawKeyword.split(/(?=[A-Z\u4e00-\u9fa5])/); // 用中文/大寫字母切詞
+
 const matched = lines.filter(line => {
   const parts = line.split(',');
-  const combined = `${parts[0]}${parts[1]}${parts[2]}`.replace(/\s/g, '');
-  return combined.includes(keyword);
+  const combined = `${parts[0]}${parts[1]}${parts[2]}`.replace(/\s/g, '').toLowerCase();
+  return keywordParts.every(part => combined.includes(part));
 });
 
           
