@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
           const response = await axios.get(csvURL);
           const lines = response.data.split('\n');
           const rawKeyword = match[1].trim().replace(/\s/g, '').toLowerCase();
-const keywordParts = rawKeyword.split(/(?=[A-Z\u4e00-\u9fa5])/); // 用中文/大寫字母切詞
+const keywordParts = rawKeyword.split(/(?=[A-Z\u4e00-\u9fa5])/);
 
 const matched = lines.filter(line => {
   const parts = line.split(',');
@@ -44,27 +44,21 @@ const matched = lines.filter(line => {
   return keywordParts.every(part => combined.includes(part));
 });
 
-          
+if (matched.length > 1) {
+  const reply = matched.slice(1).map(line => {
+    const parts = line.split(',');
+    const no = parts[0];
+    const name = parts[1];
+    const qty = parts[3];  // ✅ 第4欄是數量
+    return `${no}：${name}（${qty}）`;
+  }).join('\n');
+  
+  await client.replyMessage(event.replyToken, {
+    type: 'text',
+    text: `找到 ${matched.length - 1} 筆與「${match[1]}」相關的庫存：\n${reply}`
+  });
+}
 
-          if (matched.length > 1) {
-            const reply = matched.slice(1).map(line => {
-              const parts = line.split(',');
-              const no = parts[0];         // 產品編號
-              const name = parts[1];       // 品名
-              const qty = parts[5];        // 數量（第6欄）
-              return `${no}：${name}（${qty}）`;
-            }).join('\n');
-            
-            await client.replyMessage(event.replyToken, {
-              type: 'text',
-              text: `找到 ${matched.length - 1} 筆與「${keyword}」相關的庫存：\n${reply}`
-            });
-          } else {
-            await client.replyMessage(event.replyToken, {
-              type: 'text',
-              text: `沒有找到與「${keyword}」相關的庫存資料`
-            });
-          }
 
         } catch (err) {
           console.error(err);
