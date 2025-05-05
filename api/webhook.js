@@ -38,7 +38,14 @@ module.exports = async (req, res) => {
           const matched = lines.filter(line => line.includes(keyword));
 
           if (matched.length > 1) {
-            const reply = matched.slice(1).join('\n'); // 移除表頭
+            const reply = matched.slice(1).map(line => {
+              const parts = line.split(',');
+              const no = parts[0];         // 產品編號
+              const name = parts[1];       // 品名
+              const qty = parts[4];        // 數量（第5欄）
+              return `${no}：${name}（${qty}）`;
+            }).join('\n');
+            
             await client.replyMessage(event.replyToken, {
               type: 'text',
               text: `找到 ${matched.length - 1} 筆與「${keyword}」相關的庫存：\n${reply}`
