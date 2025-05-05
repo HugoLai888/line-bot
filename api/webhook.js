@@ -35,7 +35,11 @@ module.exports = async (req, res) => {
         try {
           const response = await axios.get(csvURL);
           const lines = response.data.split('\n');
-          const matched = lines.filter(line => line.includes(keyword));
+          const matched = lines.filter(line => {
+            const parts = line.split(',');
+            return parts[1] && parts[1].includes(keyword);
+          });
+          
 
           if (matched.length > 1) {
             const reply = matched.slice(1).map(line => {
