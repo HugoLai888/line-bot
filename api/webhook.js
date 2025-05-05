@@ -49,7 +49,7 @@ if (matched.length > 1) {
     const parts = line.split(',');
     const no = parts[0];
     const name = parts[1];
-    const qty = parts[3];  // ✅ 第4欄是數量
+    const qty = parts[6];  // ✅ 第7欄是數量
     return `${no}：${name}（${qty}）`;
   }).join('\n');
   
