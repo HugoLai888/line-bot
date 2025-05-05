@@ -51,7 +51,7 @@ const matched = lines.filter(line => {
               const parts = line.split(',');
               const no = parts[0];         // 產品編號
               const name = parts[1];       // 品名
-              const qty = parts[4];        // 數量（第5欄）
+              const qty = parts[5];        // 數量（第6欄）
               return `${no}：${name}（${qty}）`;
             }).join('\n');
             
