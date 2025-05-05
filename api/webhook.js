@@ -45,7 +45,7 @@ const matched = lines.filter(line => {
 });
 
 if (matched.length > 1) {
-  const reply = matched.slice(1).map(line => {
+  const reply = matched.map(line => {
     const parts = line.split(',');
     const no = parts[0];
     const name = parts[1];
