@@ -24,20 +24,50 @@ module.exports = async (req, res) => {
       if (event.type !== 'message' || event.message.type !== 'text') return;
 
       const msg = event.message.text;
+      const match = msg.match(/查(.*)庫存/);
+      const isGenericAsk = msg.includes("有庫存嗎");
 
-      if (msg.includes("查庫存")) {
+      // 條件一：查○○庫存
+      if (match && match[1]) {
+        const keyword = match[1].trim();
         const csvURL = 'https://docs.google.com/spreadsheets/d/1xBe8niUbKLGNYNXjIKNNCqRQxjAPPWLVsLmLfRKGR8I/export?format=csv';
+
         try {
           const response = await axios.get(csvURL);
-          const lines = response.data.split("\n");
-          const reply = `目前資料有 ${lines.length - 1} 筆（不含標題）`;
-          await client.replyMessage(event.replyToken, { type: 'text', text: reply });
+          const lines = response.data.split('\n');
+          const matched = lines.filter(line => line.includes(keyword));
+
+          if (matched.length > 1) {
+            const reply = matched.slice(1).join('\n'); // 移除表頭
+            await client.replyMessage(event.replyToken, {
+              type: 'text',
+              text: `找到 ${matched.length - 1} 筆與「${keyword}」相關的庫存：\n${reply}`
+            });
+          } else {
+            await client.replyMessage(event.replyToken, {
+              type: 'text',
+              text: `沒有找到與「${keyword}」相關的庫存資料`
+            });
+          }
+
         } catch (err) {
           console.error(err);
-          await client.replyMessage(event.replyToken, { type: 'text', text: '查詢時出錯！' });
+          await client.replyMessage(event.replyToken, {
+            type: 'text',
+            text: '查詢時發生錯誤'
+          });
         }
+
+      } else if (isGenericAsk) {
+        // 條件二：有庫存嗎
+        await client.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '請問您想查哪個產品的庫存？（例如：查卡蒂雅庫存）'
+        });
+
       } else {
-        await client.replyMessage(event.replyToken, { type: 'text', text: '請輸入「查庫存」' });
+        // 不符任何條件，不回應
+        return;
       }
     }));
 
