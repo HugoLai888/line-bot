@@ -35,10 +35,13 @@ module.exports = async (req, res) => {
         try {
           const response = await axios.get(csvURL);
           const lines = response.data.split('\n');
-          const matched = lines.filter(line => {
-            const parts = line.split(',');
-            return parts[1] && parts[1].includes(keyword);
-          });
+          const keyword = match[1].trim().replace(/\s/g, '');  // 移除空白
+const matched = lines.filter(line => {
+  const parts = line.split(',');
+  const combined = `${parts[0]}${parts[1]}${parts[2]}`.replace(/\s/g, '');
+  return combined.includes(keyword);
+});
+
           
 
           if (matched.length > 1) {
