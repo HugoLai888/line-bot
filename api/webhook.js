@@ -38,11 +38,26 @@ module.exports = async (req, res) => {
           const rawKeyword = match[1].trim().replace(/\s/g, '').toLowerCase();
 const keywordParts = rawKeyword.split(/(?=[A-Z\u4e00-\u9fa5])/);
 
-const matched = lines.filter(line => {
-  const parts = line.split(',');
-  const combined = `${parts[0]}${parts[1]}${parts[2]}`.replace(/\s/g, '').toLowerCase();
-  return keywordParts.every(part => combined.includes(part));
-});
+let matched;
+
+if (keyword === '名品') {
+  // 特例處理「名品」完全比對
+  matched = lines.filter(line => {
+    const parts = line.split(',');
+    const name = parts[1].replace(/\s/g, '').toLowerCase();
+    return name === '名品';
+  });
+} else {
+  // 原本模糊搜尋邏輯
+  const rawKeyword = keyword.toLowerCase();
+  const keywordParts = rawKeyword.split(/[^\u4e00-\u9fa5a-z0-9]/);
+
+  matched = lines.filter(line => {
+    const parts = line.split(',');
+    const combined = `${parts[0]}${parts[1]}${parts[2]}`.replace(/\s/g, '').toLowerCase();
+    return keywordParts.every(part => combined.includes(part));
+  });
+}
 
 if (matched.length > 1) {
   const reply = matched.map(line => {
